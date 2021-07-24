@@ -4,7 +4,7 @@ This is a small test script (based on https://github.com/hannob/vacdec) attempti
 Usage instructions: 
 
 ```
-git clone
+git clone https://github.com/Moto-John/VacdecGR
 cd VacdecGR
 pip install base45 cbor2
 python vacdec 
