@@ -6,6 +6,7 @@ import json
 import base45
 import cbor2
 
+# Load data from the official EU Vaccine Lists
 with open('vaccine-mah-manf.json', 'r') as myfile:
     data=myfile.read()
 VaccineManufacturerList = json.loads(data)
@@ -18,21 +19,35 @@ with open('vaccine-prophylaxis.json', 'r') as myfile:
     data=myfile.read()
 VaccineTypeList = json.loads(data)
 
+# Ask for the QR Code String
+
 cert = input("Please enter QR Code: ")
+
+#Remove the HC1: part as it is not part of the base45 string that follows
 
 b45data = cert.replace("HC1:", "")
 
+# Decode the Base45 Data
+
 zlibdata = base45.b45decode(b45data)
+
+# Decompress the Decoded data
 
 cbordata = zlib.decompress(zlibdata)
 
+# Load the cbor data structure that occurs
+
 decoded = cbor2.loads(cbordata)
 decoded_dict = cbor2.loads(decoded.value[2])
+
+# Start parsing the json data 
 
 FirstGreekSurname = decoded_dict[-260][1]['nam']['fn']
 FirstGreekName = decoded_dict[-260][1]['nam']['gn']
 FirstEnglishSurname = decoded_dict[-260][1]['nam']['fnt']
 FirstEnglishName = decoded_dict[-260][1]['nam']['gnt']
+
+# Probably the worst way to get around an error in loading the json
 
 VaccineDict = decoded_dict[-260][1]['v']
 a = json.dumps(VaccineDict)
@@ -40,15 +55,20 @@ a = a.replace("[", "")
 a = a.replace("]", "")
 VaccineDict = json.loads(a)
 
+# Continue parsing data
+
 DateOfVaccination = VaccineDict['dt']
 DoseNumber = VaccineDict['dn']
 TotalDoses = VaccineDict['sd']
+
+# Parsing data from the EU Lists
 
 VaccineManufacturer = VaccineManufacturerList['valueSetValues'][VaccineDict['ma']]['display']
 Vaccine = VaccineList['valueSetValues'][VaccineDict['mp']]['display']
 VaccineType = VaccineTypeList['valueSetValues'][VaccineDict['vp']]['display']
 DateOfBirth = decoded_dict[-260][1]['dob']
 
+# Print the parsed data
 print("\nΕλληνικό Όνομα: ", FirstGreekName)
 print("Όνομα: ", FirstEnglishName)
 print("Ελληνικό Επώνυμο: ", FirstGreekSurname)
